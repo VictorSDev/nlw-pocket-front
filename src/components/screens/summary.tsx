@@ -1,4 +1,4 @@
-import { CircleCheck, Plus } from 'lucide-react'
+import { CheckCircle2, Plus } from 'lucide-react'
 import { Button } from '../ui/button'
 import { InOrbitIcon } from '../icons/inorbit-icon'
 import { Progress, ProgressIndicator } from '../ui/progress-bar'
@@ -83,61 +83,59 @@ export function Summary() {
       </div>
 
       <div className="flex flex-col gap-3">
-        <Progress>
-          <ProgressIndicator />
+        <Progress value={8} max={15}>
+          <ProgressIndicator style={{ width: '58%' }} />
         </Progress>
-        <div className="flex justify-between items-center">
-          <p className="text-xs text-zinc-400 leading-relaxed">
+        <div className="flex justify-between items-center text-xs text-zinc-400 ">
+          <span>
             Você completou <span className="text-zinc-100">8</span> de{' '}
             <span className="text-zinc-100">15</span> metas nessa semana.
-          </p>
-          <p className="text-xs text-zinc-400 leading-relaxed">58%</p>
+          </span>
+          <span>58%</span>
         </div>
       </div>
 
       <Separator />
 
-      <div className="flex flex-wrap items-center gap-2">
+      <div className="flex flex-wrap gap-2">
         {Goals.map(goal => (
           <OutlineButton key={goal.title}>
             <Plus className="size-4 text-zinc-600" />
-            <span className="text-sm text-zinc-300">{goal.title}</span>
+            {goal.title}
           </OutlineButton>
         ))}
       </div>
 
       <div className="flex flex-col gap-6">
-        <span className="text-xl text-zinc-100 font-medium leading-snug tracking-tight">
-          Sua Semana
-        </span>
+        <h2 className="text-xl text-zinc-100 font-medium">Sua Semana</h2>
 
         {/* <span className="text-sm text-zinc-400 leading-relaxed">
           Você ainda não completou nenhuma meta essa semana.
         </span> */}
         {GoalsCompletedDate.map(goalCompletedDate => (
           <div className="flex flex-col gap-4" key={goalCompletedDate.date}>
-            <span className="text-zinc-50 font-medium leading-snug">
+            <h3 className="font-medium">
               {goalCompletedDate.date === '12-09'
                 ? 'Hoje '
                 : goalCompletedDate.date === '11-09'
                   ? 'Ontem'
                   : goalCompletedDate.date}{' '}
-              <span className="text-xs text-zinc-400 leading-snug">
+              <span className="text-xs text-zinc-400">
                 {goalCompletedDate.date === '12-09'
                   ? '(12 de Setembro)'
                   : goalCompletedDate.date === '11-09'
                     ? '(11 de Setembro)'
                     : null}
               </span>
-            </span>
-            <div className="flex flex-col gap-3">
+            </h3>
+            <ul className="flex flex-col gap-3">
               {goalCompletedDate.goalsCompleted.map(goalCompleted => (
-                <div
+                <li
                   className="flex items-center gap-2"
                   key={goalCompleted.title}
                 >
-                  <CircleCheck className="size-4 text-pink-400" />
-                  <span className="text-sm text-zinc-400 leading-snug">
+                  <CheckCircle2 className="size-4 text-pink-400" />
+                  <span className="text-sm text-zinc-400">
                     Você completou “
                     <span className="text-zinc-100 font-medium">
                       {goalCompleted.title}
@@ -147,9 +145,9 @@ export function Summary() {
                       {goalCompleted.time}
                     </span>
                   </span>
-                </div>
+                </li>
               ))}
-            </div>
+            </ul>
           </div>
         ))}
       </div>
