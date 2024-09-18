@@ -13,6 +13,12 @@ import {
 } from '../ui/radio-group'
 import { X } from 'lucide-react'
 import { Button } from '../ui/button'
+import { z } from 'zod'
+import { Controller, useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import type { CreateGoalType } from '../../types/create-goal'
+import { createGoal } from '../../api/create-goal'
+import { useQueryClient } from '@tanstack/react-query'
 
 const RadioItems = [
   { value: '1', text: '1x na semana', emoji: '🥱' },
@@ -24,7 +30,27 @@ const RadioItems = [
   { value: '7', text: 'Todos dias da semana', emoji: '🔥' },
 ]
 
+const createGoalSchema = z.object({
+  title: z.string().min(1, 'Informe a meta a realizar'),
+  desiredWeeklyFrequency: z.coerce.number().min(1).max(7),
+})
+
 export function CreateGoal() {
+  const queryClient = useQueryClient()
+  const { register, control, handleSubmit, formState, reset } =
+    useForm<CreateGoalType>({
+      resolver: zodResolver(createGoalSchema),
+    })
+
+  async function handleCreateGoal(data: CreateGoalType) {
+    await createGoal(data)
+
+    queryClient.invalidateQueries({ queryKey: ['summary'] })
+    queryClient.invalidateQueries({ queryKey: ['pending-goals'] })
+
+    reset()
+  }
+
   return (
     <DialogContent>
       <div className="h-full flex flex-col gap-6">
@@ -41,7 +67,10 @@ export function CreateGoal() {
             continuar praticando toda semana.
           </DialogDescription>
         </div>
-        <form action="" className="flex flex-col flex-1 justify-between">
+        <form
+          onSubmit={handleSubmit(handleCreateGoal)}
+          className="flex flex-col flex-1 justify-between"
+        >
           <div className="flex flex-col gap-6">
             <div className="flex flex-col gap-2">
               <Label htmlFor="title">Qual a atividade?</Label>
@@ -49,23 +78,44 @@ export function CreateGoal() {
                 id="title"
                 autoFocus
                 placeholder="Praticar exercícios, meditar, etc..."
+                {...register('title')}
               />
+
+              {formState.errors.title && (
+                <p className="text-sm text-red-400">
+                  {formState.errors.title.message}
+                </p>
+              )}
             </div>
             <div className="flex flex-col gap-2">
               <Label htmlFor="">Quantas vezes na semana?</Label>
-              <RadioGroup>
-                {RadioItems.map(item => (
-                  <RadioGroupItem key={item.value} value={item.value}>
-                    <div className="flex flex-row flex-1 justify-between items-center gap-2">
-                      <RadioGroupIndicator />
-                      <span className="text-sm text-zinc-300 font-medium leading-none">
-                        {item.text}
-                      </span>
-                      <span className="text-lg leading-none">{item.emoji}</span>
-                    </div>
-                  </RadioGroupItem>
-                ))}
-              </RadioGroup>
+              <Controller
+                control={control}
+                name="desiredWeeklyFrequency"
+                defaultValue={1}
+                render={({ field }) => {
+                  return (
+                    <RadioGroup
+                      onValueChange={field.onChange}
+                      value={String(field.value)}
+                    >
+                      {RadioItems.map(item => (
+                        <RadioGroupItem key={item.value} value={item.value}>
+                          <div className="flex flex-row flex-1 justify-between items-center gap-2">
+                            <RadioGroupIndicator />
+                            <span className="text-sm text-zinc-300 font-medium leading-none">
+                              {item.text}
+                            </span>
+                            <span className="text-lg leading-none">
+                              {item.emoji}
+                            </span>
+                          </div>
+                        </RadioGroupItem>
+                      ))}
+                    </RadioGroup>
+                  )
+                }}
+              />
             </div>
           </div>
           <div className="flex flex-row gap-3">
